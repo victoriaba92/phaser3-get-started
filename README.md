@@ -6,114 +6,148 @@ _Comenza a usar Phaser en menos de 2 horas_
 
 </header>
 
-## Step 2: Scaffolding de tu primer juego con Phaser
+## Step 3: Ready player one
 
-_¡Creaste tu "Hello World" de Phaser! :tada:_
+_¡Exelentes noticias! Conociste lo basico del scaffolding de tu primer juego :sparkles:_
 
-Ahora, vamos a crear un juego más complejo. Para ello, utilizaremos un concepto llamado _scaffolding_.
-El scaffolding es una técnica que permite crear una estructura básica de un proyecto, para luego ir agregando funcionalidades.
+¿Qué es un videojuego sin un personaje? En este paso, veremos cómo agregar un personaje a nuestro juego. También aprenderemos sobre los grupos de objetos y cómo usarlos para crear plataformas.
 
-En este caso, utilizaremos un proyecto que ya tiene la estructura básica de un juego, y luego iremos agregando funcionalidades. Como todos nos imaginamos, los juegos tienen archivos multimedias ya que son en gran parte audiovisuales.
+> :warning: <br> 🚨 A partir de ahora, solo trabajaremos con el archivo `script.js`. Por lo que deberemos tener cuidado.🚨
 
-### ⌨ Actividad: Conociendo el scaffolding
+### :keyboard: Actividad: Agregando un personaje y plataformas
 
-1. Hace un pull del proyecto en tu computadora, mediante la terminal de VSCode.
+1.  Hace un pull del proyecto en tu computadora, mediante la terminal de VSCode.
 
-   ```bash
-   git pull
-   ```
+    ```bash
+    git pull
+    ```
 
-1. En la carpeta `/docs/` encontraras una carpeta assets con los archivos multimedia que utilizara este ejemplo.
+1.  Vamos a modificar el metodo create de la clase Game, para agregar un personaje y plataformas. El codigo queda asi:
 
-1. En esa carpeta `/docs/` deberas crear los archivos `index.html` y `script.js`.
+    ```js
+    create() {
+        this.add.image(400, 300, "sky");
 
-1. En el archivo HTML, deberas agregar el siguiente codigo:
+        this.platforms = this.physics.add.staticGroup();
+        this.platforms.create(400, 568, "ground").setScale(2).refreshBody();
+        this.platforms.create(600, 400, "ground");
+        this.platforms.create(50, 250, "ground");
+        this.platforms.create(750, 220, "ground");
 
-   ```html
-   <!DOCTYPE html>
-   <html lang="en">
-     <head>
-       <meta charset="UTF-8" />
-       <title>Phaser 3 Hello World</title>
-       <script src="//cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.js"></script>
-     </head>
-     <body>
-       <canvas id="canvas" width="800" height="600"></canvas>
+        this.anims.create({
+          key: "left",
+          frames: this.anims.generateFrameNumbers("dude", { start: 0, end: 3 }),
+          frameRate: 10,
+          repeat: -1,
+        });
 
-       <script src="./script.js"></script>
-     </body>
-   </html>
-   ```
+        this.anims.create({
+          key: "turn",
+          frames: [{ key: "dude", frame: 4 }],
+          frameRate: 20,
+        });
 
-   Como puedes observar, el codigo de este html es identico al visto anteriormente.
+        this.anims.create({
+          key: "right",
+          frames: this.anims.generateFrameNumbers("dude", { start: 5, end: 8 }),
+          frameRate: 10,
+          repeat: -1,
+        });
 
-1. En el archivo JavaScript, comenzaremos a hacer la magia para dar vida al juego.
+        this.player = this.physics.add.sprite(100, 450, "dude");
+        this.player.setBounce(0.2);
+        this.player.setCollideWorldBounds(true);
 
-   ```js
-   class Game extends Phaser.Scene {
-     constructor() {
-       super("Game");
-     }
+        /*
+        Se agrega la colisión entre el personaje y las plataformas. Esto hace que el personaje no pueda atravesar las plataformas.
+        */
+        this.physics.add.collider(this.player, this.platforms);
+    }
+    ```
 
-     preload() {
-       this.load.image("sky", "./assets/images/sky.png");
-       this.load.image("ground", "./assets/images/platform.png");
-       this.load.image("star", "./assets/images/star.png");
-       this.load.image("bomb", "./assets/images/bomb.png");
-       this.load.spritesheet("dude", "./assets/images/dude.png", {
-         frameWidth: 32,
-         frameHeight: 48,
-       });
-     }
+    #### Vamos a explicarlo un poco:
 
-     create() {
-       this.add.image(400, 300, "sky");
-       this.add.image(400, 300, "star");
-     }
-   }
+    A. Lo primero que haremos sera eliminar la estrella que habiamos agregado en el paso anterior.
 
-   const config = {
-     type: Phaser.AUTO,
-     width: 800,
-     height: 600,
-     physics: {
-       default: "arcade",
-       arcade: {
-         gravity: { y: 200 },
-         debug: false,
-       },
-     },
-     scene: Game,
-   };
+    ```js
+    // this.add.image(400, 300, "star"); borrar linea
+    ```
 
-   const game = new Phaser.Game(config);
-   ```
+    B. Luego, crear un grupo de plataformas estáticas. En dicho grupo, crearemos cuatro plataformas en diferentes posiciones en el juego, utilizando el sprite "ground" para representarlas. La primera plataforma se escala al doble de su tamaño original y se actualiza su cuerpo físico.
 
-   Como puedes observar, el codigo de este JS es similar al visto anteriormente. En este caso tendremos:
+    ```js
+    this.platforms = this.physics.add.staticGroup();
+    this.platforms.create(400, 568, "ground").setScale(2).refreshBody();
+    this.platforms.create(600, 400, "ground");
+    this.platforms.create(50, 250, "ground");
+    this.platforms.create(750, 220, "ground");
+    ```
 
-   - **Game**: que es una clase que hereda de Scene de Phaser. Ahi mismo lo que tendremos es un fondo y una estrella.
-     - _preload_: precarga los recursos en el navegador, en este caso son todos archivos png.
-     - _create_: permite visualizar los recursos `sky` y `star`.
-   - **config**: es un objeto que permite decirle a Phaser como sera el juego.
-   - **game**: es donde se guardará el juego una vez que se contruya mediante `new Phaser.Game(config);`
+    C. Lo siguiente es crear las animaciones, del personaje. Para eso usaremos `anims.create`.
 
-1. Es hora de visualizar lo que hemos hecho. Para ello, deberas abrir el archivo `index.html` en tu navegador. Para ello, puedes hacerlo de dos formas:
+    - En la primera: se crea la animación "left" utilizando los frames 0, 1, 2 y 3 del spritesheet "dude". Se utilizara cuando el personaje se mueva a la izquierda.
 
-   - Haciendo click derecho sobre el archivo y seleccionando la opcion `Abrir con Live Server`.
-   - Haciendo click en el boton `Go Live` que se encuentra en la parte inferior derecha de VSCode.
+      ```js
+      this.anims.create({
+        key: "left",
+        frames: this.anims.generateFrameNumbers("dude", { start: 0, end: 3 }),
+        frameRate: 10,
+        repeat: -1,
+      });
+      ```
 
-   Luego de ello, deberas ir a tu navegador o browser favorito y abrir la url `http://localhost:5500/`. Deberas ver algo como esto:
-   <img src="https://github.com/fdegiovanni/phaser3-get-started/blob/main/images/scaffolding-demo.png" width="50%" alt="Scaffolding" />
+    - En la segunda: se crea la animación "turn" utilizando el frame 4 del spritesheet "dude". Se utilizara cuando el personaje no se mueva.
 
-1. Por favor, realiza un commit con los cambios realizados y sube los cambios a tu repositorio remoto con los siguientes comandos, ejecutalos en la Terminal de VSCode.
+      ```js
+      this.anims.create({
+        key: "turn",
+        frames: [{ key: "dude", frame: 4 }],
+        frameRate: 20,
+      });
+      ```
 
-   ```bash
-   git add .
-   git commit -m "commit scaffolding"
-   git push
-   ```
+    - En la tercera: se crea la animación "right" utilizando los frames 5, 6, 7 y 8 del spritesheet "dude". Se utilizara cuando el personaje se mueva a la derecha.
 
-1. Espera unos 20 segundos y luego actualiza esta página (desde la que estás siguiendo las instrucciones). [GitHub Actions](https://docs.github.com/es/actions) se actualizará automáticamente al siguiente paso.
+      ```js
+      this.anims.create({
+        key: "right",
+        frames: this.anims.generateFrameNumbers("dude", { start: 5, end: 8 }),
+        frameRate: 10,
+        repeat: -1,
+      });
+      ```
+
+    D. Agregaremos el personaje al juego. Se le agrega un rebote de 0.2. Se le agrega la propiedad de colisionar con los bordes del mundo.
+
+    ```js
+    this.player = this.physics.add.sprite(100, 450, "dude");
+    this.player.setBounce(0.2);
+    this.player.setCollideWorldBounds(true);
+    ```
+
+    E. Por ultimo, agregaremos la colisión entre el personaje y las plataformas. Esto hace que el personaje no pueda atravesar las plataformas.
+
+    ```js
+    this.physics.add.collider(this.player, this.platforms);
+    ```
+
+1.  Es hora de visualizar lo que hemos hecho. Para ello, deberas abrir el archivo `index.html` en tu navegador. Para ello, puedes hacerlo de dos formas:
+
+    - Haciendo click derecho sobre el archivo y seleccionando la opcion `Abrir con Live Server`.
+    - Haciendo click en el boton `Go Live` que se encuentra en la parte inferior derecha de VSCode.
+
+    Luego de ello, deberas ir a tu navegador o browser favorito y abrir la url `http://localhost:5500/`. Deberas ver algo como esto:
+    <img src="https://github.com/fdegiovanni/phaser3-get-started/blob/main/videos/ready-player-one-demo.gif" width="50%" alt="Ready player one" />
+
+1.  Por favor, realiza un commit con los cambios realizados y sube los cambios a tu repositorio remoto con los siguientes comandos, ejecutalos en la Terminal de VSCode.
+
+    ```bash
+    git add .
+    git commit -m "commit player"
+    git push
+    ```
+
+1.  Espera unos 20 segundos y luego actualiza esta página (desde la que estás siguiendo las instrucciones). [GitHub Actions](https://docs.github.com/es/actions) se actualizará automáticamente al siguiente paso.
 
 <footer>
 
