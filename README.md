@@ -6,15 +6,15 @@ _Comenza a usar Phaser en menos de 2 horas_
 
 </header>
 
-## Step 3: Ready player one
+## Step 4: Controlando a nuestro heroe
 
-_¡Exelentes noticias! Conociste lo basico del scaffolding de tu primer juego :sparkles:_
+_¡De 10! Ya tienes una pequeña base de un juego de plataformas :partying_face:_
 
-¿Qué es un videojuego sin un personaje? En este paso, veremos cómo agregar un personaje a nuestro juego. También aprenderemos sobre los grupos de objetos y cómo usarlos para crear plataformas.
+Si el jugador no puede controlar nada, no es un videjuego. Por eso ahora veremos como podemos darle vida a nuestro personaje.
 
-> :warning: <br> 🚨 A partir de ahora, solo trabajaremos con el archivo `script.js`. Por lo que deberemos tener cuidado.🚨
+> :warning: <br> 🚨 Recuerda, solo trabajaremos con el archivo `script.js`. Por lo que deberemos tener cuidado.🚨
 
-### :keyboard: Actividad: Agregando un personaje y plataformas
+### :keyboard: Actividad: Permitir que el jugador controle al personaje
 
 1.  Hace un pull del proyecto en tu computadora, mediante la terminal de VSCode.
 
@@ -22,114 +22,51 @@ _¡Exelentes noticias! Conociste lo basico del scaffolding de tu primer juego :s
     git pull
     ```
 
-1.  Vamos a modificar el metodo create de la clase Game, para agregar un personaje y plataformas. El codigo queda asi:
+1.  Vamos a modificar el metodo `create` de la clase Game. En el mismo solo agregaremos una linea de codigo, que nos permitira obtener el estado del teclado.
 
     ```js
-    create() {
-        this.add.image(400, 300, "sky");
+        create() {
+            // TODO EL CODIGO ANTERIOR
 
-        this.platforms = this.physics.add.staticGroup();
-        this.platforms.create(400, 568, "ground").setScale(2).refreshBody();
-        this.platforms.create(600, 400, "ground");
-        this.platforms.create(50, 250, "ground");
-        this.platforms.create(750, 220, "ground");
+            this.cursors = this.input.keyboard.createCursorKeys();
+        }
+    ```
 
-        this.anims.create({
-          key: "left",
-          frames: this.anims.generateFrameNumbers("dude", { start: 0, end: 3 }),
-          frameRate: 10,
-          repeat: -1,
-        });
+1.  Ahora vamos a agregar el metodo `update` de la clase Game. Aqui debemos agregar las validaciones que nos permitan mover y ejecutar las animaciones del personaje.
 
-        this.anims.create({
-          key: "turn",
-          frames: [{ key: "dude", frame: 4 }],
-          frameRate: 20,
-        });
+    ```js
+    update() {
+        if (this.cursors.left.isDown) {
+            this.player.setVelocityX(-160);
+            this.player.anims.play("left", true);
+            } else {
+            if (this.cursors.right.isDown) {
+                this.player.setVelocityX(160);
+                this.player.anims.play("right", true);
+            } else {
+                this.player.setVelocityX(0);
+                this.player.anims.play("turn");
+            }
+        }
 
-        this.anims.create({
-          key: "right",
-          frames: this.anims.generateFrameNumbers("dude", { start: 5, end: 8 }),
-          frameRate: 10,
-          repeat: -1,
-        });
-
-        this.player = this.physics.add.sprite(100, 450, "dude");
-        this.player.setBounce(0.2);
-        this.player.setCollideWorldBounds(true);
-
-        /*
-        Se agrega la colisión entre el personaje y las plataformas. Esto hace que el personaje no pueda atravesar las plataformas.
-        */
-        this.physics.add.collider(this.player, this.platforms);
+        if (this.cursors.up.isDown && this.player.body.touching.down) {
+        this.player.setVelocityY(-330);
+        }
     }
     ```
 
     #### Vamos a explicarlo un poco:
 
-    A. Lo primero que haremos sera eliminar la estrella que habiamos agregado en el paso anterior.
-
-    ```js
-    // this.add.image(400, 300, "star"); borrar linea
-    ```
-
-    B. Luego, crear un grupo de plataformas estáticas. En dicho grupo, crearemos cuatro plataformas en diferentes posiciones en el juego, utilizando el sprite "ground" para representarlas. La primera plataforma se escala al doble de su tamaño original y se actualiza su cuerpo físico.
-
-    ```js
-    this.platforms = this.physics.add.staticGroup();
-    this.platforms.create(400, 568, "ground").setScale(2).refreshBody();
-    this.platforms.create(600, 400, "ground");
-    this.platforms.create(50, 250, "ground");
-    this.platforms.create(750, 220, "ground");
-    ```
-
-    C. Lo siguiente es crear las animaciones, del personaje. Para eso usaremos `anims.create`.
-
-    - En la primera: se crea la animación "left" utilizando los frames 0, 1, 2 y 3 del spritesheet "dude". Se utilizara cuando el personaje se mueva a la izquierda.
-
-      ```js
-      this.anims.create({
-        key: "left",
-        frames: this.anims.generateFrameNumbers("dude", { start: 0, end: 3 }),
-        frameRate: 10,
-        repeat: -1,
-      });
-      ```
-
-    - En la segunda: se crea la animación "turn" utilizando el frame 4 del spritesheet "dude". Se utilizara cuando el personaje no se mueva.
-
-      ```js
-      this.anims.create({
-        key: "turn",
-        frames: [{ key: "dude", frame: 4 }],
-        frameRate: 20,
-      });
-      ```
-
-    - En la tercera: se crea la animación "right" utilizando los frames 5, 6, 7 y 8 del spritesheet "dude". Se utilizara cuando el personaje se mueva a la derecha.
-
-      ```js
-      this.anims.create({
-        key: "right",
-        frames: this.anims.generateFrameNumbers("dude", { start: 5, end: 8 }),
-        frameRate: 10,
-        repeat: -1,
-      });
-      ```
-
-    D. Agregaremos el personaje al juego. Se le agrega un rebote de 0.2. Se le agrega la propiedad de colisionar con los bordes del mundo.
-
-    ```js
-    this.player = this.physics.add.sprite(100, 450, "dude");
-    this.player.setBounce(0.2);
-    this.player.setCollideWorldBounds(true);
-    ```
-
-    E. Por ultimo, agregaremos la colisión entre el personaje y las plataformas. Esto hace que el personaje no pueda atravesar las plataformas.
-
-    ```js
-    this.physics.add.collider(this.player, this.platforms);
-    ```
+    - **update**: es un metodo que se ejecuta en cada frame del juego. Es decir, 60 veces por segundo. Aqui es donde se debe poner la logica del juego. En este caso analizaremos el input por teclado del jugador y en base a eso movemos el personaje.
+    - El primer if-else:
+      > Se verifica si la tecla de flecha izquierda está presionada. Si es así, se le asigna una velocidad negativa al personaje, lo que lo hace moverse hacia la izquierda.
+      > Se reproduce la animación "left" del personaje.
+      > Se verifica si la tecla de flecha derecha está presionada. Si es así, se le asigna una velocidad positiva al personaje, lo que lo hace moverse hacia la derecha.
+      > Se reproduce la animación "right" del personaje.
+      > Si ninguna de las teclas de flecha está presionada, se le asigna una velocidad de 0 al personaje, lo que lo detiene.
+      > Se reproduce la animación "turn" del personaje.
+    - El segundo if:
+      > Se verifica si la tecla de flecha arriba está presionada y si el personaje está tocando el suelo. Si es así, se le asigna una velocidad negativa al personaje en el eje Y, lo que lo hace saltar.
 
 1.  Es hora de visualizar lo que hemos hecho. Para ello, deberas abrir el archivo `index.html` en tu navegador. Para ello, puedes hacerlo de dos formas:
 
@@ -137,13 +74,14 @@ _¡Exelentes noticias! Conociste lo basico del scaffolding de tu primer juego :s
     - Haciendo click en el boton `Go Live` que se encuentra en la parte inferior derecha de VSCode.
 
     Luego de ello, deberas ir a tu navegador o browser favorito y abrir la url `http://localhost:5500/`. Deberas ver algo como esto:
-    <img src="https://github.com/fdegiovanni/phaser3-get-started/blob/main/videos/ready-player-one-demo.gif" width="50%" alt="Ready player one" />
+
+    <img src="https://github.com/fdegiovanni/phaser3-get-started/blob/main/videos/player-controller-demo.gif" width="50%" alt="Player controller" />
 
 1.  Por favor, realiza un commit con los cambios realizados y sube los cambios a tu repositorio remoto con los siguientes comandos, ejecutalos en la Terminal de VSCode.
 
     ```bash
     git add .
-    git commit -m "commit player"
+    git commit -m "commit controller"
     git push
     ```
 
