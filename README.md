@@ -6,43 +6,28 @@ _Comenza a usar Phaser en menos de 2 horas_
 
 </header>
 
-## Step 1: Hello World
+## Step 2: Scaffolding de tu primer juego con Phaser
 
-_¡Bienvenido al curso: "Phaser: Primeros pasos"! :wave:_
+_¡Creaste tu "Hello World" de Phaser! :tada:_
 
-Para tener un primer acercamiento a Phaser, vamos a crear un "Hola mundo" de Phaser. :earth_americas:
+Ahora, vamos a crear un juego más complejo. Para ello, utilizaremos un concepto llamado _scaffolding_.
+El scaffolding es una técnica que permite crear una estructura básica de un proyecto, para luego ir agregando funcionalidades.
 
-Este acercamiento constara en crear un pequeño proyecto que nos permita visualizar un fondo y un logo de Phaser que rebotara con los bordes del mundo/escena. 📀 _DVD_
+En este caso, utilizaremos un proyecto que ya tiene la estructura básica de un juego, y luego iremos agregando funcionalidades. Como todos nos imaginamos, los juegos tienen archivos multimedias ya que son en gran parte audiovisuales.
 
-Con esto aprenderemos:
+### ⌨ Actividad: Conociendo el scaffolding
 
-- como importar Phaser
-- como crear una escena
-- como precargar recursos
-- como crear objetos
-- como establecer comportamientos
+1. Hace un pull del proyecto en tu computadora, mediante la terminal de VSCode.
 
-Sin mas perdida de tiempo, ¡manos a la obra! :muscle:
+   ```bash
+   git pull
+   ```
 
-### ⌨ Actividad: Tu "Hola mundo" de Phaser
+1. En la carpeta `/docs/` encontraras una carpeta assets con los archivos multimedia que utilizara este ejemplo.
 
-1. Clona este repositorio en tu computadora.
-1. Abri el proyecto en Visual Studio Code.
-1. En la carpeta `/docs/hello-world` encontraras dos archivos vacios: un html y un js.
+1. En esa carpeta `/docs/` deberas crear los archivos `index.html` y `script.js`.
 
-   a. **Editando el HTML5**
-   En este archivo agregaremos la estructura de la web para soportar el juego.
-
-   Para ello agregaremos:
-
-   - tag head:
-     - con el titulo de la pestaña del navegador
-     - con la llamada CDN a Phaser
-   - tag body:
-     - con la creacion de un canvas donde se dibujara el juego
-     - con laa llamada al script que creara el juego
-
-   Solo debes copiar las siguientes lineas de codigo, pegarlas en el archivo `index.html` y guardar los cambios.
+1. En el archivo HTML, deberas agregar el siguiente codigo:
 
    ```html
    <!DOCTYPE html>
@@ -60,40 +45,30 @@ Sin mas perdida de tiempo, ¡manos a la obra! :muscle:
    </html>
    ```
 
-   b. **Editando el JS**
-   En este archivo agregaremos la logica mediante el formato que propone el framework Phaser para crear nuestro primer "juego".
+   Como puedes observar, el codigo de este html es identico al visto anteriormente.
 
-   Para ello agregaremos:
-
-   - **Escena**: las escenas son el corazon de todo juego, en ella se incorporan todos los objetos que se visualizaran y a su vez tendra el conocimiento para hacerlo y para hacer el refresh en cada frame.
-     - En este caso es un clase llamada `HelloWorld` que hereda toda su funcionalidad desde `Scene` de Phaser. Ahi mismo lo que tendremos es un fondo y un logo de Phaser que rebotara con los bordes del mundo/escena. 📀 _DVD_
-     - Sobreescribimos las funciones _preload_ y _create_
-       - preload: precarga los recursos en el navegador (imagenes, videos, sonidos, etc)
-       - create: permite visualizar los recursos, ademas de establecer los comporamientos que seguiran los objetos creados.
-   - **config**: es un objeto que permite decirle a Phaser como sera el juego. Existen muchos datos que se pueden setear.
-   - **game**: es donde se guardará el juego una vez que se contruya mediante `new Phaser.Game(config);`
-
-   Solo debes copiar las siguientes lineas de codigo, pegarlas en el archivo `script.js` y guardar los cambios.
+1. En el archivo JavaScript, comenzaremos a hacer la magia para dar vida al juego.
 
    ```js
-   class HelloWorld extends Phaser.Scene {
+   class Game extends Phaser.Scene {
      constructor() {
-       super("HelloWorld");
+       super("Game");
      }
 
      preload() {
-       this.load.image("sky", "./assets/space3.png");
-       this.load.image("logo", "./assets/logo.png");
+       this.load.image("sky", "./assets/images/sky.png");
+       this.load.image("ground", "./assets/images/platform.png");
+       this.load.image("star", "./assets/images/star.png");
+       this.load.image("bomb", "./assets/images/bomb.png");
+       this.load.spritesheet("dude", "./assets/images/dude.png", {
+         frameWidth: 32,
+         frameHeight: 48,
+       });
      }
 
      create() {
        this.add.image(400, 300, "sky");
-
-       this.logo = this.physics.add.image(400, 100, "logo");
-
-       this.logo.body.setVelocity(100, 200);
-       this.logo.body.setBounce(1, 1);
-       this.logo.body.setCollideWorldBounds(true);
+       this.add.image(400, 300, "star");
      }
    }
 
@@ -108,27 +83,33 @@ Sin mas perdida de tiempo, ¡manos a la obra! :muscle:
          debug: false,
        },
      },
-     scene: HelloWorld,
+     scene: Game,
    };
 
    const game = new Phaser.Game(config);
    ```
 
-1. Teniendo abierto el archivo `index.html` haz clic derecho y selecciona 'Open with Live Server' en el menu contextual.
+   Como puedes observar, el codigo de este JS es similar al visto anteriormente. En este caso tendremos:
 
-   <img src="https://github.com/fdegiovanni/phaser3-get-started/blob/main/images/go-live.png" width="50%" alt="Go Live" />
+   - **Game**: que es una clase que hereda de Scene de Phaser. Ahi mismo lo que tendremos es un fondo y una estrella.
+     - _preload_: precarga los recursos en el navegador, en este caso son todos archivos png.
+     - _create_: permite visualizar los recursos `sky` y `star`.
+   - **config**: es un objeto que permite decirle a Phaser como sera el juego.
+   - **game**: es donde se guardará el juego una vez que se contruya mediante `new Phaser.Game(config);`
 
-   Otra forma es hacer clic en el botón Go Live que aparece en la barra inferior del VSCode (siempre teniendo activo el archivo HTML mencionado).
-   <img src="https://github.com/fdegiovanni/phaser3-get-started/blob/main/images/go-live.png" width="50%" alt="Go Live Button" />
+1. Es hora de visualizar lo que hemos hecho. Para ello, deberas abrir el archivo `index.html` en tu navegador. Para ello, puedes hacerlo de dos formas:
 
-1. En tu navegador favorito navega a la URL `http://localhost:5500/` y veras el juego corriendo (verifica que el puerto sea el mismo que el que te indica el plugin Live Server). :tada:
-   <img src="https://github.com/fdegiovanni/phaser3-get-started/blob/main/videos/demo-hello-world.gif" width="50%" alt="Hello World" />
+   - Haciendo click derecho sobre el archivo y seleccionando la opcion `Abrir con Live Server`.
+   - Haciendo click en el boton `Go Live` que se encuentra en la parte inferior derecha de VSCode.
+
+   Luego de ello, deberas ir a tu navegador o browser favorito y abrir la url `http://localhost:5500/`. Deberas ver algo como esto:
+   <img src="https://github.com/fdegiovanni/phaser3-get-started/blob/main/images/scaffolding-demo.png" width="50%" alt="Scaffolding" />
 
 1. Por favor, realiza un commit con los cambios realizados y sube los cambios a tu repositorio remoto con los siguientes comandos, ejecutalos en la Terminal de VSCode.
 
    ```bash
    git add .
-   git commit -m "commit hello world"
+   git commit -m "commit scaffolding"
    git push
    ```
 
