@@ -6,17 +6,15 @@ _Comenza a usar Phaser en menos de 2 horas_
 
 </header>
 
-## Step 5: Sistema de puntaje
+## Step 6: Agregando enemigos
 
-_¡Como se mueve ese Dude! 💃_
+_Al infinito y más allá con ese puntaje 💰_
 
-Podemos mover el personaje, pero aun no podemos hacer mucho mas que ir a los lados y saltar por las plataformas. ¿Donde esta el riesgo y lo divertido?
-Es un buen momento de implementar un sistema de recompensa y castigo. Para ello, vamos a crear un sistema de puntaje que nos permita sumar puntos cuando el personaje recolecte monedas y perder puntos cuando el personaje toque a los enemigos. Nos enfocamos en lo primero en este paso.
-Tambien vamos a mostrar el puntaje en pantalla.
+Ya tenemos un sistema de puntaje, pero aún no tenemos enemigos. Ya es momento de agregarlos y tener un juego más completo.
 
 > :warning: <br> 🚨 Recuerda, solo trabajaremos con el archivo `script.js`. Por lo que deberemos tener cuidado.🚨
 
-### :keyboard: Actividad: Crear un sistema de puntaje
+### :keyboard: Actividad: Agregar enemigos
 
 1.  Hace un pull del proyecto en tu computadora, mediante la terminal de VSCode.
 
@@ -24,119 +22,81 @@ Tambien vamos a mostrar el puntaje en pantalla.
     git pull
     ```
 
-1.  Vas a modificar el metodo `create` de la clase Game. En el mismo vamos a realizar varias actividades que explicaremos debajo.
+1.  Vamos a modificar el metodo `create` de la clase Game. En el mismo vamos a realizar varias actividades que explicaremos debajo.
 
     ```js
         create() {
-            // TODO EL CODIGO ANTERIOR
+          // TODO EL CODIGO ANTERIOR
 
-            this.stars = this.physics.add.group({
-              key: "star",
-              repeat: 11,
-              setXY: { x: 12, y: 0, stepX: 70 },
-            });
-
-            this.stars.children.iterate(function (child) {
-              child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-            });
-
-            this.physics.add.collider(this.stars, this.platforms);
-
-            this.physics.add.overlap(
-              this.player,
-              this.stars,
-              this.collectStar,
-              null,
-              this
-            );
-
-            this.score = 0;
-            this.scoreText = this.add.text(16, 16, `Score: ${this.score}`, {
-              fontSize: "32px",
-              fill: "#000",
-            });
+          this.bombs = this.physics.add.group();
+          this.physics.add.collider(this.bombs, this.platforms);
+          this.physics.add.collider(
+            this.player,
+            this.bombs,
+            this.hitBomb,
+            null,
+            this
+          );
         }
     ```
 
     #### Vamos a explicarlo un poco:
 
-    A. Se crea un grupo de estrellas. Se crean 12 estrellas en diferentes posiciones en el juego, utilizando el sprite "star" para representarlas.
-    Se utiliza el metodo `setXY` para establecer la posicion de cada estrella. Se utiliza el metodo `stepX` para establecer la distancia entre cada estrella.
+    A. Se crea un grupo de bombas. No se agrega ninguna bomba. Eso lo haremos luego de juntar las primeras 12 estrellas.
+    B. Se agrega la colisión entre las bombas y las plataformas. Esto hace que las bombas no puedan atravesar las plataformas.
+    C. Se agrega la colisión entre el personaje y las bombas. Esto hace que el personaje pierda el juego si toca una bomba. Para lograrlo, se llama a una función llamada `hitBomb` cuando el personaje y una bomba colisionan.
+
+1.  Vamos a modificar el metodo `collectStar` de la clase Game.
 
     ```js
-    this.stars = this.physics.add.group({
-      key: "star",
-      repeat: 11,
-      setXY: { x: 12, y: 0, stepX: 70 },
-    });
-    ```
+      collectStar() {
+        // TODO EL CODIGO ANTERIOR
 
-    B. Se le agrega un rebote de 0.2 a cada estrella. Para ello se recorre el grupo de estrellas y se le asigna un valor aleatorio entre 0.4 y 0.8 a cada una.
 
-    ```js
-    this.stars.children.iterate(function (child) {
-      child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-    });
-    ```
+        if (this.stars.countActive(true) === 0) {
+          this.stars.children.iterate(function (child) {
+            child.enableBody(true, child.x, 0, true, true);
+          });
 
-    C. Se agrega la colisión entre las estrellas y las plataformas. Esto hace que las estrellas no puedan atravesar las plataformas.
+          var x =
+            player.x < 400
+              ? Phaser.Math.Between(400, 800)
+              : Phaser.Math.Between(0, 400);
 
-    ```js
-    this.physics.add.collider(this.stars, this.platforms);
-    ```
+          var bomb = this.bombs.create(x, 16, "bomb");
+          bomb.setBounce(1);
+          bomb.setCollideWorldBounds(true);
+          bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+        }
+      }
 
-    D. Se agrega la colisión entre el personaje y las estrellas. Esto hace que el personaje pueda recolectar las estrellas.
-
-    ```js
-    this.physics.add.overlap(
-      this.player,
-      this.stars,
-      this.collectStar,
-      null,
-      this
-    );
-    ```
-
-    E. Se establece el puntaje en 0. Se crea el texto del puntaje. Se lo posiciona en la esquina superior izquierda. Se le da estilo.
-
-    ```js
-    this.score = 0;
-    this.scoreText = this.add.text(16, 16, `Score: ${this.score}`, {
-      fontSize: "32px",
-      fill: "#000",
-    });
-    ```
-
-1.  Vas a agregar un metodo `collectStar` en la clase Game. En el mismo vamos a realizar varias actividades que tienen que ejecutarse cuando el personaje recolecta una estrella.
-
-    ```js
-    collectStar(player, star) {
-        star.disableBody(true, true);
-
-        this.score += 10;
-        this.scoreText.setText(`Score: ${this.score}`);
-    }
     ```
 
     #### Vamos a explicarlo un poco:
 
-    A. Se deshabilita el cuerpo de la estrella. Esto hace que la estrella desaparezca del juego.
+    Se verifica si no quedan estrellas en el juego. Si es así, se vuelven a crear 12 estrellas, habilitando los cuerpos de las estrellas y dandole la posicion `y = 0` y se crea una bomba en una posición aleatoria del eje X.
+    A la bomba se le asigna un rebote de 1, para que rebote siempre. Se le asigna un limite de colision con el mundo, para que no se salga del mundo. Se le asigna una velocidad aleatoria en el eje X y una velocidad de 20 en el eje Y.
+
+1.  Vamos a agregar el metodo `hitBomb` de la clase Game.
 
     ```js
-    star.disableBody(true, true);
+      hitBomb(player, bomb) {
+        this.physics.pause();
+
+        player.setTint(0xff0000);
+
+        player.anims.play("turn");
+
+        this.gameOver = true;
+      }
     ```
 
-    B. Se suma 10 puntos al puntaje.
+    #### Vamos a explicarlo un poco:
 
-    ```js
-    this.score += 10;
-    ```
-
-    C. Se actualiza el texto del puntaje.
-
-    ```js
-    this.scoreText.setText(`Score: ${this.score}`);
-    ```
+    Se pausa la fisica del juego.
+    Se le cambia el color al personaje a rojo.
+    Se reproduce la animación "turn" del personaje.
+    Se establece la variable `gameOver` en true.
 
 1.  Es hora de visualizar lo que hemos hecho. Para ello, deberas abrir el archivo `index.html` en tu navegador. Para ello, puedes hacerlo de dos formas:
 
@@ -145,13 +105,13 @@ Tambien vamos a mostrar el puntaje en pantalla.
 
     Luego de ello, deberas ir a tu navegador o browser favorito y abrir la url `http://localhost:5500/`. Deberas ver algo como esto:
 
-    <img src="https://github.com/fdegiovanni/phaser3-get-started/blob/main/videos/score-system-demo.gif" width="50%" alt="Score system" />
+    <img src="https://github.com/fdegiovanni/phaser3-get-started/blob/main/videos/enemies-demo.gif" width="50%" alt="Enemies" />
 
 1.  Por favor, realiza un commit con los cambios realizados y sube los cambios a tu repositorio remoto con los siguientes comandos, ejecutalos en la Terminal de VSCode.
 
     ```bash
     git add .
-    git commit -m "commit score"
+    git commit -m "commit enemy"
     git push
     ```
 
